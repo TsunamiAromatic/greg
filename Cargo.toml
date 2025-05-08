@@ -2,5 +2,8 @@
 name = "greg"
 version = "0.1.0"
 edition = "2024"
+description = "GREG (Generative Regular Expressions) - Parses a regex pattern and generates a string from it"
 
 [dependencies]
+clap = { version = "4.5.37", features = ["derive"] }
+rand = "0.9.1"
