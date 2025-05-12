@@ -53,7 +53,6 @@ fn main() {
     let options = Options::parse();
     if options.verbose { println!("Pattern: {:?}", options.pattern); }
 
-
     let mut tokens = lex_gregex(&options.pattern);
     if options.verbose { println!("Tokens: {:?}", tokens); }
     
@@ -76,6 +75,9 @@ fn evaluate(expression: &Expression, options: &Options) -> String {
         Expression::RepetitionRange { expr, min, max } => evaluate_repeat(expr, *min, *max, options),
         Expression::Escape(_) => evaluate_escape(expression),
         Expression::Terminal(_) => evaluate_terminal(expression),
+        Expression::AlternationGroup(alt) => evaluate_alternation_group(alt, options),
+        Expression::None => "".to_string(),
+        Expression::CharacterRange(r) => random_range((*r).clone()).to_string(),
     }
 }
 
@@ -87,6 +89,9 @@ fn evaluate_alternation(a: &Expression, b: &Expression, options: &Options) -> St
     }
 }
 
+fn evaluate_alternation_group(alternation: &Expression, options: &Options) -> String {
+    evaluate(alternation, options)
+}
 
 fn evaluate_repeat(expression: &Expression, min: u32, max: Option<u32>, options: &Options) -> String {
     let mut result = String::new();
@@ -125,12 +130,13 @@ fn evaluate_terminal(expression: &Expression) -> String {
 
 fn evaluate_escape(expression: &Expression) -> String {
     match expression {
-        Expression::Escape(e) => match e {
-            's' => ' '.to_string(),
-            't' => '\t'.to_string(),
-            'n' => '\n'.to_string(),
-            'r' => '\r'.to_string(),
-            'e' => '\u{1b}'.to_string(),
+        Expression::Escape(e) => match e.as_str() {
+            "s" => ' '.to_string(),
+            "t" => '\t'.to_string(),
+            "n" => '\n'.to_string(),
+            "r" => '\r'.to_string(),
+            "e" => '\u{1b}'.to_string(),
+            "d" => random_range('0'..='9').to_string(),
             _ => e.to_string()
         }
         _ => String::new()
